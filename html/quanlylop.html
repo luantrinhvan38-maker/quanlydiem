@@ -1,0 +1,107 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý lớp</title>
+    <link rel="stylesheet" href="../css/quanlylop.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="trang_chu.html">Trang chủ</a>
+            <a href="quanlylop.html">Quản lý lớp</a>
+            <a href="danhsachlop.html">Danh sách lớp</a>
+            <a href="nhapdiem.html">Nhập điểm</a>
+            <a href="thongketra.html">Thống kê/Tra cứu</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>Quản lý lớp học phần</h1>
+        <div>
+            <input type="text" id="ma_lop" placeholder="Nhập mã lớp">
+            <button onclick="loadClass()">Tìm lớp</button>
+        </div>
+        <div id="class_info" style="display: none;">
+            <h2>Thông tin lớp</h2>
+            <p id="ten_mon"></p>
+            <p id="hoc_ky"></p>
+            <p id="nam_hoc"></p>
+            <p id="so_tin_chi"></p>
+            <h3>Danh sách sinh viên</h3>
+            <table id="student_list">
+                <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Tên SV</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <h3>Thêm sinh viên</h3>
+            <form id="add_student_form">
+                <input type="text" name="ma_sv" placeholder="Mã SV" required>
+                <input type="text" name="ten_sv" placeholder="Tên SV" required>
+                <textarea name="reason" placeholder="Lý do" required></textarea>
+                <button type="submit">Thêm</button>
+            </form>
+            <h3>Xóa sinh viên</h3>
+            <form id="remove_student_form">
+                <input type="text" name="ma_sv" placeholder="Mã SV" required>
+                <textarea name="reason" placeholder="Lý do" required></textarea>
+                <button type="submit">Xóa</button>
+            </form>
+            <h3>Đề xuất thay đổi giảng viên</h3>
+            <form id="change_teacher_form">
+                <textarea name="reason" placeholder="Lý do" required></textarea>
+                <button type="submit">Gửi đề xuất</button>
+            </form>
+            <h3>Đề xuất xóa lớp</h3>
+            <form id="delete_class_form">
+                <textarea name="reason" placeholder="Lý do" required></textarea>
+                <button type="submit">Gửi đề xuất</button>
+            </form>
+        </div>
+    </div>
+    <script src="../js/quanlylop.js"></script>
+</body>
+</html>

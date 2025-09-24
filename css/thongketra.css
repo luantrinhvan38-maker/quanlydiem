@@ -1,0 +1,39 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+nav {
+    background: #eee;
+    padding: 10px;
+}
+nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: #333;
+}
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+form {
+    margin: 20px 0;
+}
+input {
+    display: block;
+    margin: 10px 0;
+    padding: 5px;
+    width: 100%;
+}
+button {
+    padding: 5px 10px;
+}
