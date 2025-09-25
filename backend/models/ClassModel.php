@@ -1,5 +1,5 @@
 <?php
-require_once '../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 class ClassModel {
     private $pdo;
@@ -24,18 +24,73 @@ class ClassModel {
 
     // Thêm sinh viên
     public function addStudent($class_id, $ma_sv, $ten_sv, $reason) {
-        $stmt = $this->pdo->prepare("INSERT INTO students (ma_sv, ten_sv, class_id) VALUES (?, ?, ?)");
-        $stmt->execute([$ma_sv, $ten_sv, $class_id]);
-        $this->logAction($class_id, 'add_student', $reason);
-        return ['success' => 'Thêm sinh viên thành công'];
+        // Validation input
+        if (empty($ma_sv) || empty($ten_sv)) {
+            return ['error' => 'Mã sinh viên và tên sinh viên không được để trống'];
+        }
+        
+        if (empty($reason)) {
+            return ['error' => 'Lý do không được để trống'];
+        }
+        
+        if (!is_numeric($class_id) || $class_id <= 0) {
+            return ['error' => 'ID lớp không hợp lệ'];
+        }
+        
+        // Kiểm tra lớp có tồn tại không
+        $stmt = $this->pdo->prepare("SELECT id FROM classes WHERE id = ?");
+        $stmt->execute([$class_id]);
+        if (!$stmt->fetch()) {
+            return ['error' => 'Lớp không tồn tại'];
+        }
+        
+        // Kiểm tra sinh viên đã tồn tại trong lớp chưa
+        $stmt = $this->pdo->prepare("SELECT id FROM students WHERE ma_sv = ? AND class_id = ?");
+        $stmt->execute([$ma_sv, $class_id]);
+        if ($stmt->fetch()) {
+            return ['error' => 'Sinh viên đã tồn tại trong lớp này'];
+        }
+        
+        try {
+            $stmt = $this->pdo->prepare("INSERT INTO students (ma_sv, ten_sv, class_id) VALUES (?, ?, ?)");
+            $stmt->execute([$ma_sv, $ten_sv, $class_id]);
+            $this->logAction($class_id, 'add_student', $reason);
+            return ['success' => 'Thêm sinh viên thành công'];
+        } catch (PDOException $e) {
+            return ['error' => 'Lỗi thêm sinh viên: ' . $e->getMessage()];
+        }
     }
 
     // Bớt sinh viên
     public function removeStudent($class_id, $ma_sv, $reason) {
-        $stmt = $this->pdo->prepare("DELETE FROM students WHERE ma_sv = ? AND class_id = ?");
+        // Validation input
+        if (empty($ma_sv)) {
+            return ['error' => 'Mã sinh viên không được để trống'];
+        }
+        
+        if (empty($reason)) {
+            return ['error' => 'Lý do không được để trống'];
+        }
+        
+        if (!is_numeric($class_id) || $class_id <= 0) {
+            return ['error' => 'ID lớp không hợp lệ'];
+        }
+        
+        // Kiểm tra sinh viên có tồn tại trong lớp không
+        $stmt = $this->pdo->prepare("SELECT id FROM students WHERE ma_sv = ? AND class_id = ?");
         $stmt->execute([$ma_sv, $class_id]);
-        $this->logAction($class_id, 'remove_student', $reason);
-        return ['success' => 'Xóa sinh viên thành công'];
+        if (!$stmt->fetch()) {
+            return ['error' => 'Sinh viên không tồn tại trong lớp này'];
+        }
+        
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM students WHERE ma_sv = ? AND class_id = ?");
+            $stmt->execute([$ma_sv, $class_id]);
+            $this->logAction($class_id, 'remove_student', $reason);
+            return ['success' => 'Xóa sinh viên thành công'];
+        } catch (PDOException $e) {
+            return ['error' => 'Lỗi xóa sinh viên: ' . $e->getMessage()];
+        }
     }
 
     // Đề xuất thay đổi giảng viên

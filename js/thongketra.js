@@ -1,7 +1,7 @@
 document.getElementById('search_student_form').addEventListener('submit', function(e) {
     e.preventDefault();
     const ma_sv = this.querySelector('input[name="ma_sv"]').value;
-    fetch(`../backend/routes.php?controller=search&action=search_by_student&ma_sv=${ma_sv}`)
+    fetch(`backend/routes.php?controller=search&action=search_by_student&ma_sv=${ma_sv}`)
         .then(response => response.json())
         .then(data => {
             const resultDiv = document.getElementById('student_result');
@@ -25,14 +25,14 @@ document.getElementById('search_student_form').addEventListener('submit', functi
 document.getElementById('search_class_form').addEventListener('submit', function(e) {
     e.preventDefault();
     const ma_lop = this.querySelector('input[name="ma_lop"]').value;
-    fetch(`../backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
+    fetch(`backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
                 alert(data.error);
                 return;
             }
-            fetch(`../backend/routes.php?controller=search&action=search_by_class&class_id=${data.id}`)
+            fetch(`backend/routes.php?controller=search&action=search_by_class&class_id=${data.id}`)
                 .then(response => response.json())
                 .then(students => {
                     const tbody = document.querySelector('#class_result tbody');
@@ -57,7 +57,7 @@ document.getElementById('search_class_form').addEventListener('submit', function
 document.getElementById('statistics_form').addEventListener('submit', function(e) {
     e.preventDefault();
     const ma_lop = this.querySelector('input[name="ma_lop"]').value;
-    fetch(`../backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
+    fetch(`backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {

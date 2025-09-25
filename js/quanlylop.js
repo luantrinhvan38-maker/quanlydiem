@@ -1,8 +1,31 @@
 let classId = null;
 
+function removeStudent(ma_sv) {
+    if (!confirm(`Bạn có chắc muốn xóa sinh viên ${ma_sv}?`)) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('controller', 'class');
+    formData.append('action', 'remove_student');
+    formData.append('class_id', classId);
+    formData.append('ma_sv', ma_sv);
+    formData.append('reason', 'Xóa sinh viên từ danh sách');
+    
+    fetch('backend/routes.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.success || data.error);
+            if (data.success) loadClass();
+        });
+}
+
 function loadClass() {
     const ma_lop = document.getElementById('ma_lop').value;
-    fetch(`../backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
+    fetch(`backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -34,7 +57,7 @@ document.getElementById('add_student_form').addEventListener('submit', function(
     formData.append('controller', 'class');
     formData.append('action', 'add_student');
     formData.append('class_id', classId);
-    fetch('../backend/routes.php', {
+    fetch('backend/routes.php', {
         method: 'POST',
         body: formData
     })
@@ -51,7 +74,7 @@ document.getElementById('remove_student_form').addEventListener('submit', functi
     formData.append('controller', 'class');
     formData.append('action', 'remove_student');
     formData.append('class_id', classId);
-    fetch('../backend/routes.php', {
+    fetch('backend/routes.php', {
         method: 'POST',
         body: formData
     })
@@ -68,7 +91,7 @@ document.getElementById('change_teacher_form').addEventListener('submit', functi
     formData.append('controller', 'class');
     formData.append('action', 'propose_change_teacher');
     formData.append('class_id', classId);
-    fetch('../backend/routes.php', {
+    fetch('backend/routes.php', {
         method: 'POST',
         body: formData
     })
@@ -82,7 +105,7 @@ document.getElementById('delete_class_form').addEventListener('submit', function
     formData.append('controller', 'class');
     formData.append('action', 'propose_delete_class');
     formData.append('class_id', classId);
-    fetch('../backend/routes.php', {
+    fetch('backend/routes.php', {
         method: 'POST',
         body: formData
     })
