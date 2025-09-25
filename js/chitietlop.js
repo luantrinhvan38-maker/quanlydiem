@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const ma_lop = urlParams.get('ma_lop');
-    fetch(`../backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
+    fetch(`backend/routes.php?controller=class&action=get_class&ma_lop=${ma_lop}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {

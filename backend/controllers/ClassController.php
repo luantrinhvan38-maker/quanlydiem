@@ -1,5 +1,5 @@
 <?php
-require_once '../models/ClassModel.php';
+require_once __DIR__ . '/../models/ClassModel.php';
 
 class ClassController {
     private $classModel;

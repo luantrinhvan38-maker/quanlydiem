@@ -1,6 +1,6 @@
 <?php
-require_once '../models/ScoreModel.php';
-require_once '../models/StudentModel.php';
+require_once __DIR__ . '/../models/ScoreModel.php';
+require_once __DIR__ . '/../models/StudentModel.php';
 
 class ScoreController {
     private $scoreModel;

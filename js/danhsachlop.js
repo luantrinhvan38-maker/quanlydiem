@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('../backend/routes.php?controller=class&action=get_all_classes')
+    fetch('backend/routes.php?controller=class&action=get_all_classes')
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('#class_list tbody');

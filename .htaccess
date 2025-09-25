@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Chuyển hướng API calls đến backend
+RewriteRule ^api/(.*)$ backend/routes.php [QSA,L]
+
+# Chuyển hướng trang chủ
+RewriteRule ^$ html/trang_chu.html [L]
+
+# Cho phép truy cập trực tiếp các file HTML
+RewriteRule ^([^/]+)\.html$ html/$1.html [L]
