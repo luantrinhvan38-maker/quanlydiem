@@ -1,0 +1,94 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thống kê/Tra cứu</title>
+    <link rel="stylesheet" href="../css/thongketra.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="trang_chu.html">Trang chủ</a>
+            <a href="quanlylop.html">Quản lý lớp</a>
+            <a href="danhsachlop.html">Danh sách lớp</a>
+            <a href="nhapdiem.html">Nhập điểm</a>
+            <a href="thongketra.html">Thống kê/Tra cứu</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>Thống kê/Tra cứu</h1>
+        <h3>Tra cứu theo mã sinh viên</h3>
+        <form id="search_student_form">
+            <input type="text" name="ma_sv" placeholder="Mã SV" required>
+            <button type="submit">Tra cứu</button>
+        </form>
+        <div id="student_result"></div>
+        <h3>Tra cứu theo mã lớp</h3>
+        <form id="search_class_form">
+            <input type="text" name="ma_lop" placeholder="Mã lớp" required>
+            <button type="submit">Tra cứu</button>
+        </form>
+        <table id="class_result">
+            <thead>
+                <tr>
+                    <th>Mã SV</th>
+                    <th>Tên SV</th>
+                    <th>Điểm chuyên cần</th>
+                    <th>Điểm giữa kỳ</th>
+                    <th>Điểm thảo luận</th>
+                    <th>Điểm cuối kỳ</th>
+                    <th>Điểm tổng kết</th>
+                    <th>Xếp loại</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h3>Thống kê lớp</h3>
+        <form id="statistics_form">
+            <input type="text" name="ma_lop" placeholder="Mã lớp" required>
+            <button type="submit">Thống kê</button>
+        </form>
+        <div id="statistics_result"></div>
+    </div>
+    <script src="../js/thongketra.js"></script>
+</body>
+</html>
