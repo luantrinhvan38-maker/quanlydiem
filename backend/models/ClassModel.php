@@ -10,16 +10,50 @@ class ClassModel {
 
     // Tra cứu lớp theo mã lớp
     public function getClassByMaLop($ma_lop) {
-        $stmt = $this->pdo->prepare("SELECT * FROM classes WHERE ma_lop = ?");
-        $stmt->execute([$ma_lop]);
-        $class = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($class) {
-            // Lấy danh sách sinh viên
-            $stmt = $this->pdo->prepare("SELECT ma_sv, ten_sv FROM students WHERE class_id = ?");
+        try {
+            // Chuẩn hóa mã lớp
+            $ma_lop = trim($ma_lop);
+            
+            // Kiểm tra mã lớp có hợp lệ
+            if (empty($ma_lop)) {
+                return ['error' => 'Mã lớp không được để trống'];
+            }
+
+            // Truy vấn thông tin lớp và số lượng sinh viên
+            $stmt = $this->pdo->prepare("
+                SELECT c.*, 
+                       COUNT(DISTINCT s.id) as so_sinh_vien,
+                       COUNT(DISTINCT sc.id) as so_sinh_vien_co_diem
+                FROM classes c
+                LEFT JOIN students s ON c.id = s.class_id
+                LEFT JOIN scores sc ON s.id = sc.student_id
+                WHERE c.ma_lop = ?
+                GROUP BY c.id
+            ");
+            $stmt->execute([$ma_lop]);
+            $class = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$class) {
+                return ['error' => 'Không tìm thấy lớp với mã ' . htmlspecialchars($ma_lop)];
+            }
+
+            // Lấy danh sách sinh viên với thông tin điểm
+            $stmt = $this->pdo->prepare("
+                SELECT s.ma_sv, s.ten_sv,
+                       CASE WHEN COUNT(sc.id) > 0 THEN 1 ELSE 0 END as co_diem
+                FROM students s
+                LEFT JOIN scores sc ON s.id = sc.student_id
+                WHERE s.class_id = ?
+                GROUP BY s.id
+            ");
             $stmt->execute([$class['id']]);
             $class['students'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $class;
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return ['error' => 'Đã xảy ra lỗi khi truy vấn thông tin lớp'];
         }
-        return $class ?: ['error' => 'Không tìm thấy lớp'];
     }
 
     // Thêm sinh viên
